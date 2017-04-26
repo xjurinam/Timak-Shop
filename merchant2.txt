@@ -1,0 +1,24 @@
+{
+	"merchant_name":"Škoda",
+	"merchant_uuid":"63878r97-ea3c-47d8-99a8-0857cv1129a1",
+	"connection_options" :
+		{
+			"host" : "localhost",
+			"port" : 1883,
+			"clean_session":false,
+			"username" : "Škoda",
+			"password" : "merchant02"
+		},
+	"bank_options" :
+		[
+			{
+				"IBAN" : "SK7009000000001234567892"
+			}
+		],
+	"products" :
+		[
+		{"product_name":"Škoda_Rapid","product_price":12550,"product_id":1,"topic":""},
+		{"product_name":"Škoda_Citygo_3D","product_price":7955,"product_id":2,"topic":"automobil/Skoda"},
+		{"product_name":"Škoda_Octavia","product_price":14890,"product_id":3,"topic":"automobil/Skoda"}
+		]
+}

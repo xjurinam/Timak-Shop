@@ -1,0 +1,31 @@
+{
+	"merchant_name":"Lidl",
+	"merchant_uuid":"rt123456-ea3c-47d8-99a8-0857cv1129a1",
+	"connection_options" :
+		{
+			"host" : "localhost",
+			"port" : 1883,
+			"clean_session":false,
+			"username" : "Lidl",
+			"password" : "merchant01"
+		},
+	"bank_options" :
+		[
+			{
+				"IBAN" : "SK7009000000001234567892"
+			}
+		],
+	"products" :
+		[
+			{
+				"product_name":"ceresne",
+				"product_price":3.2,
+				"product_id":1,
+				"topic":"ovocie/domace"
+			},
+			{
+				"product_name":"pomaranče","product_price":1.7,"product_id":2,"topic":"ovocie/zahranicne"
+			},
+{"product_name":"jablká","product_price":0.8,"product_id":3,"topic":"ovocie/domace"},
+{"product_name":"mango","product_price":2.6,"product_id":4,"topic":"ovocie/zahranicne"},
+{"product_name":"jahody","product_price":1.02,"product_id":5,"topic":"ovocie/domace"}]}

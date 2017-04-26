@@ -1,0 +1,24 @@
+{
+	"merchant_name":"Tesco",
+	"merchant_uuid":"638b3497-ea3c-47d8-99a8-0857c45129a1",
+	"connection_options" :
+		{
+			"host" : "localhost",
+			"port" : 1883,
+			"clean_session":false,
+			"username" : "Tesco",
+			"password" : "merchant03"
+		},
+	"bank_options" :
+		[
+			{
+				"IBAN" : "SK7009000000001234567892"
+			}
+		],
+	"products" :
+		[
+		{"product_name":"Kofola","product_price":1.09,"product_id":1,"topic":"napoje/sladene"},
+		{"product_name":"Sprite","product_price":12,"product_id":2,"topic":"napoje/sladene"},
+		{"product_name":"Mirinda","product_price":1,"product_id":3,"topic":"napoje/sladene"}
+		]
+}
