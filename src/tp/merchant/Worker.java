@@ -92,14 +92,18 @@ public class Worker implements IMqttMerchant{
     public void divideMessages(String topic, String payload){
         JsonReader reader = Json.createReader(new StringReader(payload));
         JsonObject object = reader.readObject();
-        String messageId = object.getString("messageId");
+        String messageId = "";
+        if(object.containsKey("messageId"))
+            messageId = object.getString("messageId");
         String messageType = object.getString("messageType");
-        String senderUuid = object.getString("senderUuid");
+        String senderUuid = "";
+        if(object.containsKey("senderUuid"))
+            senderUuid = object.getString("senderUuid");
         String json = object.getJsonObject("payload").toString();
         if(messageType.equals("00000011")){
             reserveProduct(json);
         }
-        if(messageType.equals("00000101")){
+        else if(messageType.equals("00000101")){
             endReservation(json);
         }
         else{
@@ -165,17 +169,19 @@ public class Worker implements IMqttMerchant{
                     if(reservation.getOrderId() == orderId && reservation.getState() == -1)
                         counter++;
                 }
+                System.out.println("End reservation with uuid " + reservationUuid + " ... [OK]");
                 if(counter == 0){
-                    System.out.println("R: "+reservations.size());
+                    List<Reservation> remeveReservation = new ArrayList();
+                    //System.out.println("R: "+reservations.size());
                     for(Reservation reservation : reservations){
                         if(reservation.getOrderId() == orderId){
                             mailMessage +=  reservation.getProduct().getName() + " - "
                                     + reservation.getAmount() + "x\n";
-                            reservations.remove(reservation);
+                            remeveReservation.add(reservation);
                         }
                     }
-                    System.out.println("R: "+reservations.size());
-                    System.out.println("End reservation with uuid " + reservationUuid + " ... [OK]");
+                    reservations.removeAll(remeveReservation);
+                    //System.out.println("R: "+reservations.size());
                     sentProductsToPNode();
                     sendEmail(mail, mailMessage);
                 }
