@@ -1,6 +1,6 @@
 {
 	"merchant_name":"Tesco",
-	"merchant_uuid":"638b3497-ea3c-47d8-99a8-0857c45129a1",
+	"merchant_uuid":"12343497-ea3c-47d8-99a8-0857c45129a1",
 	"connection_options" :
 		{
 			"host" : "localhost",
