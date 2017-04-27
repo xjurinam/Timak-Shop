@@ -17,19 +17,21 @@ public class Reservation {
     private Product product;
     private int productId;
     private int amount;
+    private int state;
     private String reservationUuid;
     private Date reservationDate;
 
     public Reservation() {
         this.reservationDate = new Date();
+        this.state = -1;
     }
 
     public Reservation(int orderId, int productId, int amount, String reservationUuid) {
+        this();
         this.orderId = orderId;
         this.productId = productId;
         this.amount = amount;
         this.reservationUuid = reservationUuid;
-        this.reservationDate = new Date();
     }
 
     public int getOrderId() {
@@ -78,6 +80,14 @@ public class Reservation {
 
     public void setReservationDate(Date reservationDate) {
         this.reservationDate = reservationDate;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
     }
     
 }

@@ -8,11 +8,19 @@ package tp.merchant;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import tp.message.ConfigMessage;
 import tp.message.ProductsMessage;
@@ -65,7 +73,7 @@ public class Worker implements IMqttMerchant{
             System.out.println("Sending products to PNode ... [OK]");
         } catch (MqttException ex) {
             System.out.println("Sending products to PNode ... [FAIL]");
-            System.err.printf(ex.toString());
+            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -77,7 +85,7 @@ public class Worker implements IMqttMerchant{
             System.out.println("Sending initial message to PNode ... [OK]");
         } catch (MqttException ex) {
             System.out.println("Sending initial message to PNode ... [FAIL]");
-            System.err.printf(ex.toString());
+            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -90,6 +98,9 @@ public class Worker implements IMqttMerchant{
         String json = object.getJsonObject("payload").toString();
         if(messageType.equals("00000011")){
             reserveProduct(json);
+        }
+        if(messageType.equals("00000101")){
+            endReservation(json);
         }
         else{
             System.out.println("Unknown incoming message type ... [FAIL]");
@@ -123,7 +134,89 @@ public class Worker implements IMqttMerchant{
         } catch (MqttException ex) {
             System.out.println("Reservation product " + reservation.getProduct().getName()
                     + " amount " + reservation.getAmount() + " ... [FAIL]");
-            System.err.printf(ex.toString());
+            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void endReservation(String json){
+        JsonReader reader = Json.createReader(new StringReader(json));
+        JsonObject object = reader.readObject();
+        String reservationUuid = object.getString("reservationUuid");
+        int orderId = object.getInt("orderId");
+        int success = object.getInt("success");
+        String mail = object.getString("mail");
+        String message = object.getString("message");
+        try{
+            int counter = 0; // Pocitadlo kolko je v zozname rezervacii z rovnakej objednavky
+            String mailMessage = "";
+            synchronized(this){
+                for(Reservation reservation : reservations){
+                    if(reservation.getReservationUuid().equals(reservationUuid)){
+                        reservation.setState(success);
+                        Product product = reservation.getProduct();
+                        if(success == 1){
+                            product.removeObjednane(reservation.getAmount());
+                            product.addPredane(reservation.getAmount());
+                        }else{
+                            product.removeObjednane(reservation.getAmount());
+                            product.addSklad(reservation.getAmount());
+                        }
+                    }
+                    if(reservation.getOrderId() == orderId && reservation.getState() == -1)
+                        counter++;
+                }
+                if(counter == 0){
+                    System.out.println("R: "+reservations.size());
+                    for(Reservation reservation : reservations){
+                        if(reservation.getOrderId() == orderId){
+                            mailMessage +=  reservation.getProduct().getName() + " - "
+                                    + reservation.getAmount() + "x\n";
+                            reservations.remove(reservation);
+                        }
+                    }
+                    System.out.println("R: "+reservations.size());
+                    System.out.println("End reservation with uuid " + reservationUuid + " ... [OK]");
+                    sentProductsToPNode();
+                    sendEmail(mail, mailMessage);
+                }
+            }
+        }catch(Exception ex){
+            System.out.println("End reservation with uuid " + reservationUuid + " ... [FAIL]");
+            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void sendEmail(String mailTo, String sprava) {
+        final String username = "nodeprocess";
+	final String password = "Lap53dun";
+        
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.socketFactory.port", "465");
+        props.put("mail.smtp.socketFactory.class",
+                        "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.port", "465");
+        
+        Session session = Session.getInstance(props,
+                new javax.mail.Authenticator() {
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(username, password);
+			}
+		  });
+        try {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress("nodeprocess@gmail.com"));
+            message.setRecipients(Message.RecipientType.TO,
+            InternetAddress.parse(mailTo));
+            message.setSubject("Doručenie objednávky od " + this.merchant.getMerchantName());
+            message.setText(sprava);
+
+            //Transport.send(message);
+            System.out.println("Send email to " + mailTo + " ... [OK]");
+        } catch (MessagingException ex) {
+            System.out.println("Send email to " + mailTo + " ... [FAIL]");
+            Logger.getLogger(Worker.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
