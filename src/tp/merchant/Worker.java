@@ -173,17 +173,21 @@ public class Worker implements IMqttMerchant{
                 if(counter == 0){
                     List<Reservation> remeveReservation = new ArrayList();
                     //System.out.println("R: "+reservations.size());
+                    mailMessage += "Doručujeme Vám nasledovné produkty:\n";
                     for(Reservation reservation : reservations){
                         if(reservation.getOrderId() == orderId){
                             mailMessage +=  reservation.getProduct().getName() + " - "
-                                    + reservation.getAmount() + "x\n";
+                                    + reservation.getAmount() + "x\t" + 
+                                    String.format("%.2f", (reservation.getProduct().getPrice() * reservation.getAmount())) + " €\n";
                             remeveReservation.add(reservation);
                         }
                     }
                     reservations.removeAll(remeveReservation);
+                    mailMessage += "\nĎakujeme za Váš nákup.";
                     //System.out.println("R: "+reservations.size());
                     sentProductsToPNode();
-                    sendEmail(mail, mailMessage);
+                    if(Main.useMail)
+                        sendEmail(mail, mailMessage);
                 }
             }
         }catch(Exception ex){
@@ -218,7 +222,7 @@ public class Worker implements IMqttMerchant{
             message.setSubject("Doručenie objednávky od " + this.merchant.getMerchantName());
             message.setText(sprava);
 
-            //Transport.send(message);
+            Transport.send(message);
             System.out.println("Send email to " + mailTo + " ... [OK]");
         } catch (MessagingException ex) {
             System.out.println("Send email to " + mailTo + " ... [FAIL]");

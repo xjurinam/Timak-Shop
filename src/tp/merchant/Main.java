@@ -18,10 +18,18 @@ import tp.message.ConfigMessage;
  * @author marek
  */
 public class Main {
+    
+    public static boolean useMail = true;
+    
     public static void main(String[] args) {
         if(args.length == 0) {
             System.out.println("Need configuration file name as argument!");
             System.exit(-1);
+        }
+        else{
+            for(String arg : args)
+                if(arg.contains("-m"))
+                    Main.useMail = false;
         }
         // Nacitanie konfiguracie
         ConfigMessage configMessage = new ConfigMessage(
@@ -41,7 +49,7 @@ public class Main {
                 @Override
                 public void run() {
                     try {
-                        System.out.println("Exit signal!");
+                        System.out.println("Exit signal shop "+merchant.getMerchantName() + "!");
                         merchant.disconnectFromBroker();
                     } catch (MqttException ex) {
                         System.err.println(ex.toString());

@@ -82,12 +82,11 @@ public class Merchant2 implements IMqttMerchant{
     
     public void connectToBroker() throws MqttException{
         MemoryPersistence persistance = new MemoryPersistence();
-        this.connOpts.setCleanSession(false);
         this.connOpts.setAutomaticReconnect(true);
         this.client = new MqttAsyncClient(this.connOpts.getServerURIs()[1], this.merchantName, persistance);
         this.token = client.connect(this.connOpts);
         this.token.waitForCompletion();
-        System.out.println("Connecting to broker ... [OK]");
+        System.out.println("Connecting to broker shop " + this.merchantName +  " ... [OK]");
     }
     
     public void disconnectFromBroker() throws MqttException{
